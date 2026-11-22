@@ -51,4 +51,9 @@ public class Employee {
         this.basicSalary = basicSalary;
     }
 
+    @Override
+    public String toString() {
+        return String.format("ID: %-8s Name: %-15s Dept: %-12s Designation: %-15s Basic: %.2f",
+                id, name, department, designation, basicSalary);
+    }
 }
