@@ -8,15 +8,26 @@ import java.util.Map;
 public class EmployeeService {
     private final Map<String, Employee> employees = new LinkedHashMap<String, Employee>();
 
+    /** Returns false if an employee with the same ID already exists. */
     public boolean addEmployee(Employee employee) {
-        if (employees.containsKey(employee.getId())) {
+        String key = normalize(employee.getId());
+        if (employees.containsKey(key)) {
             return false;
         }
-        employees.put(employee.getId(), employee);
+        employees.put(key, employee);
         return true;
+    }
+
+    /** Returns the employee, or null if not found. */
+    public Employee findById(String id) {
+        return employees.get(normalize(id));
     }
 
     public List<Employee> getAllEmployees() {
         return new ArrayList<Employee>(employees.values());
+    }
+
+    private String normalize(String id) {
+        return id.trim().toUpperCase();
     }
 }
