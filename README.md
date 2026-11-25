@@ -41,10 +41,24 @@ The existing calculator uses `double` with two-decimal display formatting. It is
 From this project folder:
 
 ```text
-javac -encoding UTF-8 -d build src/ems/*.java src/ems/ui/*.java tests/ems/*.java
-java -cp build ems.StorageTest
-java -Djava.awt.headless=true -cp build ems.UiSmokeTest
-java -cp build ems.ui.MainFrame
+
+Run it from the aana folder, because the Java server looks for the frontend in a relative frontend folder.
+
+1. Open PowerShell and enter the project folder:
+
+cd E:\College\anna\aana
+
+1. Compile the Java sources (you only need to do this after source changes, or if build has no compiled classes):
+
+New-Item -ItemType Directory -Force build
+javac -encoding UTF-8 -d build src\ems\*.java src\ems\ui\*.java tests\ems\*.java
+
+1. Start the web server:
+
+java -cp build ems.Main
+
+Keep that window open, then visit http://localhost:8080 in your browser. The HTML frontend is served by the Java server; ems.ui.MainFrame is a separate desktop app and isn't needed. Press
+Ctrl+C in PowerShell to stop the server. If it is already running on port 8080, just open the URL rather than starting another copy.
 ```
 
 The tests are plain Java programs, with no JUnit dependency. They cover CSV persistence and error handling, salary calculation, and headless Swing panel interactions. Native window appearance and printer/file-picker dialogs should also be checked manually in IntelliJ.
