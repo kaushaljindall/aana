@@ -36,6 +36,30 @@ public class SalarySlip {
         return totalDeductions;
     }
 
+    public double getHra() {
+        return hra;
+    }
+
+    public double getDa() {
+        return da;
+    }
+
+    public double getTa() {
+        return ta;
+    }
+
+    public double getProvidentFund() {
+        return providentFund;
+    }
+
+    public double getIncomeTax() {
+        return incomeTax;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
     public String format() {
         String line = "==========================================\n";
         StringBuilder sb = new StringBuilder();

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Salary Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .table-row:hover { background-color: #f0fdf4; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <svg class="h-8 w-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-gray-900">EMS</span>
+                    </div>
+                    <div class="hidden md:ml-8 md:flex md:space-x-1">
+                        <button data-tab="dashboard" class="tab-btn px-4 py-2 text-sm font-medium text-primary-700 bg-primary-50 border-b-2 border-primary-600 rounded-t-lg" role="tab" aria-selected="true">Dashboard</button>
+                        <button data-tab="employees" class="tab-btn px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-b-2 border-transparent rounded-t-lg" role="tab" aria-selected="false">Employees</button>
+                        <button data-tab="add" class="tab-btn px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-b-2 border-transparent rounded-t-lg" role="tab" aria-selected="false">Add Employee</button>
+                        <button data-tab="salary" class="tab-btn px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-b-2 border-transparent rounded-t-lg" role="tab" aria-selected="false">Salary Slip</button>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span id="emp-count" class="text-sm text-gray-500 mr-4 hidden sm:block">0 Employees</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Tab Bar -->
+    <div class="md:hidden bg-white border-b border-gray-200">
+        <div class="flex overflow-x-auto">
+            <button data-tab="dashboard" class="tab-btn px-4 py-3 text-sm font-medium text-primary-700 bg-primary-50 border-b-2 border-primary-600 whitespace-nowrap" role="tab" aria-selected="true">Dashboard</button>
+            <button data-tab="employees" class="tab-btn px-4 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap" role="tab" aria-selected="false">Employees</button>
+            <button data-tab="add" class="tab-btn px-4 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap" role="tab" aria-selected="false">Add Employee</button>
+            <button data-tab="salary" class="tab-btn px-4 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap" role="tab" aria-selected="false">Salary Slip</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Tab -->
+        <div id="tab-dashboard" class="tab-content active" role="tabpanel">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Welcome to EMS</h1>
+                <p class="mt-2 text-gray-600">Employee Salary Management System — manage records, calculate salaries, and generate slips.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-primary-100 text-primary-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Total Employees</p>
+                            <p id="stat-total" class="text-2xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Departments</p>
+                            <p id="stat-depts" class="text-2xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-amber-100 text-amber-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Total Monthly Payroll</p>
+                            <p id="stat-payroll" class="text-2xl font-bold text-gray-900">₹0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-8">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="switchTab('add')" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all flex items-center group">
+                        <div class="p-3 rounded-full bg-primary-100 text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-medium text-gray-900">Add New Employee</p>
+                            <p class="text-sm text-gray-500">Create a new employee record</p>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('salary')" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all flex items-center group">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-medium text-gray-900">Generate Salary Slip</p>
+                            <p class="text-sm text-gray-500">Calculate and view salary details</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees Tab -->
+        <div id="tab-employees" class="tab-content" role="tabpanel">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
+                <button onclick="switchTab('add')" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Add Employee
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="employees-table">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Department</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Designation</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Salary</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200" id="employees-tbody">
+                            <!-- Rows inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="py-12 text-center hidden">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No employees found</h3>
+                    <p class="mt-1 text-sm text-gray-500">Get started by adding a new employee.</p>
+                    <button onclick="switchTab('add')" class="mt-4 text-primary-600 hover:text-primary-900 font-medium">Add Employee →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Employee Tab -->
+        <div id="tab-add" class="tab-content" role="tabpanel">
+            <div class="max-w-2xl">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Add New Employee</h1>
+                <form id="add-form" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6" novalidate>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="emp-id" class="block text-sm font-medium text-gray-700 mb-1">Employee ID <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-id" name="id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="e.g., E001">
+                        </div>
+                        <div>
+                            <label for="emp-name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="Full name">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="emp-dept" class="block text-sm font-medium text-gray-700 mb-1">Department <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-dept" name="department" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="e.g., Engineering">
+                        </div>
+                        <div>
+                            <label for="emp-desig" class="block text-sm font-medium text-gray-700 mb-1">Designation <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-desig" name="designation" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="e.g., Developer">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="emp-basic" class="block text-sm font-medium text-gray-700 mb-1">Monthly Basic Salary <span class="text-red-500">*</span></label>
+                        <input type="number" id="emp-basic" name="basicSalary" required step="0.01" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="e.g., 40000">
+                    </div>
+                    <div class="flex justify-end gap-4 pt-4 border-t border-gray-200">
+                        <button type="button" onclick="resetForm()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">Clear</button>
+                        <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors flex items-center gap-2">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Save Employee
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Salary Slip Tab -->
+        <div id="tab-salary" class="tab-content" role="tabpanel">
+            <div class="max-w-3xl">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                    <h1 class="text-2xl font-bold text-gray-900">Generate Salary Slip</h1>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="slip-id" class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                            <input type="text" id="slip-id" placeholder="Enter Employee ID" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        </div>
+                        <button id="generate-slip" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors self-end flex items-center gap-2">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Generate
+                        </button>
+                    </div>
+                </div>
+
+                <div id="slip-container" class="hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <h2 id="slip-title" class="text-lg font-semibold text-gray-900">Salary Slip</h2>
+                            <div class="flex gap-2">
+                                <button onclick="printSlip()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors flex items-center gap-2 text-sm">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4"/>
+                                    </svg>
+                                    Print
+                                </button>
+                                <button onclick="downloadSlip()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors flex items-center gap-2 text-sm">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6" id="slip-content">
+                            <!-- Salary slip content inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="slip-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    <p id="slip-error-msg"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+            <svg id="toast-icon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span id="toast-msg"></span>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API = '/api';
+
+        // State
+        let employees = [];
+        let currentSlip = null;
+
+        // DOM Elements
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const employeesTbody = document.getElementById('employees-tbody');
+        const emptyState = document.getElementById('empty-state');
+        const addForm = document.getElementById('add-form');
+        const slipContainer = document.getElementById('slip-container');
+        const slipContent = document.getElementById('slip-content');
+        const slipError = document.getElementById('slip-error');
+        const slipErrorMsg = document.getElementById('slip-error-msg');
+        const generateSlipBtn = document.getElementById('generate-slip');
+        const slipIdInput = document.getElementById('slip-id');
+        const empCount = document.getElementById('emp-count');
+        const statTotal = document.getElementById('stat-total');
+        const statDepts = document.getElementById('stat-depts');
+        const statPayroll = document.getElementById('stat-payroll');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEmployees();
+            setupTabs();
+            setupForm();
+            setupSlipGeneration();
+        });
+
+        // Tab Navigation
+        function setupTabs() {
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+        }
+
+        function switchTab(tabName) {
+            tabBtns.forEach(btn => {
+                const isActive = btn.dataset.tab === tabName;
+                btn.classList.toggle('text-primary-700', isActive);
+                btn.classList.toggle('bg-primary-50', isActive);
+                btn.classList.toggle('border-primary-600', isActive);
+                btn.classList.toggle('text-gray-500', !isActive);
+                btn.classList.toggle('border-transparent', !isActive);
+                btn.setAttribute('aria-selected', isActive);
+            });
+            tabContents.forEach(content => {
+                content.classList.toggle('active', content.id === 'tab-' + tabName);
+            });
+
+            // Refresh data when switching to employees tab
+            if (tabName === 'employees') loadEmployees();
+            if (tabName === 'dashboard') updateDashboard();
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const content = document.getElementById('toast-content');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-msg');
+
+            msg.textContent = message;
+            content.className = 'bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3';
+            if (type === 'success') {
+                content.classList.add('bg-primary-600');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
+            } else if (type === 'error') {
+                content.classList.add('bg-red-600');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // API Calls
+        async function apiGet(endpoint) {
+            const res = await fetch(API + endpoint);
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        async function apiPost(endpoint, data) {
+            const res = await fetch(API + endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const text = await res.text();
+            if (!res.ok) throw new Error(text);
+            return text ? JSON.parse(text) : null;
+        }
+
+        // Load Employees
+        async function loadEmployees() {
+            try {
+                employees = await apiGet('/employees');
+                renderEmployeesTable();
+                updateDashboard();
+                empCount.textContent = `${employees.length} Employee${employees.length !== 1 ? 's' : ''}`;
+            } catch (err) {
+                console.error('Failed to load employees:', err);
+                showToast('Failed to load employees', 'error');
+            }
+        }
+
+        function renderEmployeesTable() {
+            if (employees.length === 0) {
+                employeesTbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+            employeesTbody.innerHTML = employees.map(emp => `
+                <tr class="table-row">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${escapeHtml(emp.id)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${escapeHtml(emp.name)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${escapeHtml(emp.department)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${escapeHtml(emp.designation)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">₹${formatNumber(emp.basicSalary)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="viewSlip('${escapeHtml(emp.id)}')" class="text-primary-600 hover:text-primary-900 font-medium">View Slip</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateDashboard() {
+            const total = employees.length;
+            const depts = new Set(employees.map(e => e.department)).size;
+            const payroll = employees.reduce((sum, e) => {
+                // Quick net salary estimate: basic * 1.35 * 0.88 approx
+                return sum + e.basicSalary * 1.35 * 0.88;
+            }, 0);
+
+            statTotal.textContent = total;
+            statDepts.textContent = depts;
+            statPayroll.textContent = '₹' + formatNumber(payroll);
+        }
+
+        // Add Employee Form
+        function setupForm() {
+            addForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(addForm);
+                const data = {
+                    id: formData.get('id'),
+                    name: formData.get('name'),
+                    department: formData.get('department'),
+                    designation: formData.get('designation'),
+                    basicSalary: formData.get('basicSalary')
+                };
+
+                try {
+                    await apiPost('/employees', data);
+                    showToast('Employee added successfully!');
+                    resetForm();
+                    loadEmployees();
+                    switchTab('employees');
+                } catch (err) {
+                    showToast(err.message.replace('{"error":"', '').replace('"}', ''), 'error');
+                }
+            });
+        }
+
+        function resetForm() {
+            addForm.reset();
+        }
+
+        // Salary Slip
+        function setupSlipGeneration() {
+            generateSlipBtn.addEventListener('click', () => viewSlip(slipIdInput.value));
+            slipIdInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') viewSlip(slipIdInput.value);
+            });
+        }
+
+        async function viewSlip(id) {
+            if (!id.trim()) {
+                showToast('Please enter an Employee ID', 'error');
+                return;
+            }
+
+            try {
+                const slip = await apiGet('/slip?id=' + encodeURIComponent(id));
+                currentSlip = slip;
+                renderSlip(slip);
+                slipContainer.classList.remove('hidden');
+                slipError.classList.add('hidden');
+
+                // Switch to salary tab if not already there
+                if (!document.getElementById('tab-salary').classList.contains('active')) {
+                    switchTab('salary');
+                }
+            } catch (err) {
+                slipContainer.classList.add('hidden');
+                slipError.classList.remove('hidden');
+                slipErrorMsg.textContent = err.message.replace('{"error":"', '').replace('"}', '');
+            }
+        }
+
+        function renderSlip(slip) {
+            slipContent.innerHTML = `
+                <div class="mb-6">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><span class="text-gray-500">Employee ID:</span> <span class="font-medium ml-2">${escapeHtml(slip.id)}</span></div>
+                        <div><span class="text-gray-500">Name:</span> <span class="font-medium ml-2">${escapeHtml(slip.name)}</span></div>
+                        <div><span class="text-gray-500">Department:</span> <span class="font-medium ml-2">${escapeHtml(slip.department)}</span></div>
+                        <div><span class="text-gray-500">Designation:</span> <span class="font-medium ml-2">${escapeHtml(slip.designation)}</span></div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">EARNINGS</h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="text-gray-500">Basic Salary:</span> <span class="font-medium ml-2">₹${formatNumber(slip.basic)}</span></div>
+                        <div><span class="text-gray-500">HRA (20%):</span> <span class="font-medium ml-2">₹${formatNumber(slip.hra)}</span></div>
+                        <div><span class="text-gray-500">DA (10%):</span> <span class="font-medium ml-2">₹${formatNumber(slip.da)}</span></div>
+                        <div><span class="text-gray-500">TA (5%):</span> <span class="font-medium ml-2">₹${formatNumber(slip.ta)}</span></div>
+                        <div class="col-span-2 border-t border-gray-200 pt-2">
+                            <span class="text-gray-500">Gross Salary:</span> <span class="font-bold ml-2 text-lg">₹${formatNumber(slip.gross)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">DEDUCTIONS</h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="text-gray-500">Provident Fund (12%):</span> <span class="font-medium ml-2">₹${formatNumber(slip.pf)}</span></div>
+                        <div><span class="text-gray-500">Income Tax:</span> <span class="font-medium ml-2">₹${formatNumber(slip.tax)}</span></div>
+                        <div class="col-span-2 border-t border-gray-200 pt-2">
+                            <span class="text-gray-500">Total Deductions:</span> <span class="font-bold ml-2">₹${formatNumber(slip.deductions)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-semibold text-primary-800">NET SALARY</span>
+                        <span class="text-2xl font-bold text-primary-700">₹${formatNumber(slip.net)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function printSlip() {
+            if (!currentSlip) return;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Salary Slip - ${currentSlip.id}</title>
+                    <style>
+                        body { font-family: monospace; padding: 20px; }
+                        .slip { max-width: 600px; margin: 0 auto; }
+                        h2 { text-align: center; margin-bottom: 20px; }
+                        .section { margin: 15px 0; }
+                        .row { display: flex; justify-content: space-between; padding: 5px 0; }
+                        .total { font-weight: bold; border-top: 1px solid #000; padding-top: 5px; }
+                        .net { background: #f0fdf4; padding: 10px; font-size: 1.2em; }
+                    </style>
+                </head>
+                <body>
+                    <div class="slip">
+                        <h2>SALARY SLIP</h2>
+                        <div class="section">
+                            <div class="row"><span>Employee ID:</span><span>${currentSlip.id}</span></div>
+                            <div class="row"><span>Name:</span><span>${currentSlip.name}</span></div>
+                            <div class="row"><span>Department:</span><span>${currentSlip.department}</span></div>
+                            <div class="row"><span>Designation:</span><span>${currentSlip.designation}</span></div>
+                        </div>
+                        <h3>EARNINGS</h3>
+                        <div class="section">
+                            <div class="row"><span>Basic Salary</span><span>₹${formatNumber(currentSlip.basic)}</span></div>
+                            <div class="row"><span>HRA (20%)</span><span>₹${formatNumber(currentSlip.hra)}</span></div>
+                            <div class="row"><span>DA (10%)</span><span>₹${formatNumber(currentSlip.da)}</span></div>
+                            <div class="row"><span>TA (5%)</span><span>₹${formatNumber(currentSlip.ta)}</span></div>
+                            <div class="row total"><span>Gross Salary</span><span>₹${formatNumber(currentSlip.gross)}</span></div>
+                        </div>
+                        <h3>DEDUCTIONS</h3>
+                        <div class="section">
+                            <div class="row"><span>Provident Fund (12%)</span><span>₹${formatNumber(currentSlip.pf)}</span></div>
+                            <div class="row"><span>Income Tax</span><span>₹${formatNumber(currentSlip.tax)}</span></div>
+                            <div class="row total"><span>Total Deductions</span><span>₹${formatNumber(currentSlip.deductions)}</span></div>
+                        </div>
+                        <div class="section net">
+                            <div class="row"><span>NET SALARY</span><span>₹${formatNumber(currentSlip.net)}</span></div>
+                        </div>
+                    </div>
+                    <script>window.onload = () => window.print();<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function downloadSlip() {
+            if (!currentSlip) return;
+            const text = `
+SALARY SLIP
+==============================
+Employee ID : ${currentSlip.id}
+Name        : ${currentSlip.name}
+Department  : ${currentSlip.department}
+Designation : ${currentSlip.designation}
+------------------------------
+EARNINGS
+Basic Salary       : ₹${formatNumber(currentSlip.basic)}
+HRA                : ₹${formatNumber(currentSlip.hra)}
+DA                 : ₹${formatNumber(currentSlip.da)}
+TA                 : ₹${formatNumber(currentSlip.ta)}
+Gross Salary       : ₹${formatNumber(currentSlip.gross)}
+------------------------------
+DEDUCTIONS
+Provident Fund     : ₹${formatNumber(currentSlip.pf)}
+Income Tax         : ₹${formatNumber(currentSlip.tax)}
+Total Deductions   : ₹${formatNumber(currentSlip.deductions)}
+==============================
+NET SALARY           : ₹${formatNumber(currentSlip.net)}
+==============================
+            `.trim();
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `salary-slip-${currentSlip.id}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Salary slip downloaded!');
+        }
+
+        // Utilities
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatNumber(num) {
+            return Number(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+    </script>
+</body>
+</html>
